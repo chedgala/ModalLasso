@@ -54,8 +54,12 @@
 #' @param nlambda length of the automatic grid.
 #' @param lambda.min.ratio smallest grid value as a fraction of the largest;
 #'   default \code{0.01} when \eqn{n > p} and \code{0.05} otherwise.
-#' @param alpha elastic-net mixing parameter passed to \pkg{glmnet};
-#'   \code{alpha = 1} (default) is the Lasso.
+#' @param alpha elastic-net mixing parameter passed to \pkg{glmnet}:
+#'   \code{alpha = 1} (default) is the Lasso, \code{0 < alpha < 1} the elastic
+#'   net and \code{alpha = 0} ridge regression. Ridge produces no exact zeros,
+#'   so \code{selected} contains every covariate and the EBIC, which counts
+#'   active coefficients, is not a selection criterion there; compare ridge
+#'   fits by prediction instead.
 #' @param penalty.factor optional vector of length \eqn{p} of relative penalty
 #'   weights (adaptive Lasso); zeros leave a variable unpenalized.
 #' @param gamma_ebic the EBIC constant \eqn{\gamma_{\mathrm{EBIC}} \in [0,1]};
@@ -123,7 +127,7 @@ modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
                         lambda = NULL, nlambda = 50, lambda.min.ratio = NULL,
                         alpha = 1, penalty.factor = NULL, gamma_ebic = 0.5,
                         dfmax = NULL, line_search = TRUE, standardize = TRUE,
-                        tol = 1e-7, maxit = 200, verbose = FALSE) {
+                        tol = 1e-6, maxit = 200, verbose = FALSE) {
   cl <- match.call()
   family <- match.arg(family)
   fam <- .get_family(family)
@@ -137,7 +141,10 @@ modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
   n <- length(y); p <- ncol(X)
   if (is.null(colnames(X))) colnames(X) <- paste0("x", seq_len(p))
   if (is.null(penalty.factor)) penalty.factor <- rep(1, p)
-  if (is.null(lambda.min.ratio)) lambda.min.ratio <- if (n > p) 0.01 else 0.05
+  if (is.null(lambda.min.ratio)) {
+    lambda.min.ratio <- if (n > p) 0.01 else 0.05
+    if (alpha == 0) lambda.min.ratio <- 1e-4   # glmnet inflates lambda_max for ridge
+  }
   if (is.null(dfmax)) dfmax <- min(p, max(5, floor(0.8 * n)))
 
   ## ---- objective pieces --------------------------------------------------
@@ -233,11 +240,13 @@ modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
     ebics[l] <- -2 * ll + df * log(n) + 2 * gamma_ebic * df * log(p)
     if (verbose) cat(sprintf("lambda[%2d] = %8.5f  df = %3d  loglik = %10.3f  EBIC = %10.3f  it = %3d\n",
                              l, lam, df - 2, ll, ebics[l], it))
-    if (df - 2 > dfmax) {            # stop the path before (near-)saturation
-      L <- max(l - 1, 1)             # and discard the fit that crossed dfmax
-      break
+    if (alpha > 0) {                  # sparse penalties only: ridge never produces zeros
+      if (df - 2 > dfmax) {           # stop the path before (near-)saturation
+        L <- max(l - 1, 1)            # and discard the fit that crossed dfmax
+        break
+      }
+      if (df - 2 == dfmax) { L <- l; break }
     }
-    if (df - 2 == dfmax) { L <- l; break }
   }
   keep <- seq_len(L)
   lambda <- lambda[keep]; coefs <- coefs[, keep, drop = FALSE]

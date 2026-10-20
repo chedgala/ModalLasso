@@ -1,7 +1,7 @@
 Package: ModalLasso
 Type: Package
 Title: Penalized Parametric Modal Regression for High-Dimensional Positive Responses
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Christian", "Galarza", email = "chedgala@espol.edu.ec", role = c("aut", "cre")),
     person("Victor H.", "Lachos", email = "hlachos@uconn.edu", role = "aut"))

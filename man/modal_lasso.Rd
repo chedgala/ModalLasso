@@ -17,7 +17,7 @@ modal_lasso(
   dfmax = NULL,
   line_search = TRUE,
   standardize = TRUE,
-  tol = 1e-07,
+  tol = 1e-06,
   maxit = 200,
   verbose = FALSE
 )
@@ -38,8 +38,12 @@ If \code{NULL} (default) a grid of length \code{nlambda} is built.}
 \item{lambda.min.ratio}{smallest grid value as a fraction of the largest;
 default \code{0.01} when \eqn{n > p} and \code{0.05} otherwise.}
 
-\item{alpha}{elastic-net mixing parameter passed to \pkg{glmnet};
-\code{alpha = 1} (default) is the Lasso.}
+\item{alpha}{elastic-net mixing parameter passed to \pkg{glmnet}:
+\code{alpha = 1} (default) is the Lasso, \code{0 < alpha < 1} the elastic
+net and \code{alpha = 0} ridge regression. Ridge produces no exact zeros,
+so \code{selected} contains every covariate and the EBIC, which counts
+active coefficients, is not a selection criterion there; compare ridge
+fits by prediction instead.}
 
 \item{penalty.factor}{optional vector of length \eqn{p} of relative penalty
 weights (adaptive Lasso); zeros leave a variable unpenalized.}
