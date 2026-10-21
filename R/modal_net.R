@@ -77,7 +77,7 @@
 #' @param maxit maximum number of proximal Newton iterations per grid point.
 #' @param verbose print progress along the path.
 #'
-#' @return An object of class \code{"ModalLasso"}, a list with components
+#' @return An object of class \code{"ModalNet"}, a list with components
 #' \item{gamma}{estimated coefficients (intercept first) at the EBIC-selected
 #'   \eqn{\lambda}.}
 #' \item{phi}{estimated dispersion at the selected \eqn{\lambda}.}
@@ -117,13 +117,13 @@
 #' X <- matrix(rnorm(n * p), n, p)
 #' gamma_true <- c(1, 0.6, -0.5, 0.4, rep(0, p - 3))
 #' dat <- generate_modal_data(X, gamma_true, phi = 0.3, family = "gamma")
-#' fit <- modal_lasso(dat$y, X, family = "gamma")
+#' fit <- modal_net(dat$y, X, family = "gamma")
 #' fit
 #' summary(fit)
 #' plot(fit)
 #'
 #' @export
-modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
+modal_net <- function(y, X, family = c("gamma", "weibull", "lognormal"),
                         lambda = NULL, nlambda = 50, lambda.min.ratio = NULL,
                         alpha = 1, penalty.factor = NULL, gamma_ebic = 0.5,
                         dfmax = NULL, line_search = TRUE, standardize = TRUE,
@@ -271,7 +271,7 @@ modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
     family = family, n = n, p = p, gamma_ebic = gamma_ebic, alpha = alpha,
     boundary = boundary, dfmax = dfmax,
     xnames = colnames(X), y = y, X = X, call = cl)
-  class(out) <- "ModalLasso"
+  class(out) <- "ModalNet"
   out
 }
 
@@ -279,7 +279,7 @@ modal_lasso <- function(y, X, family = c("gamma", "weibull", "lognormal"),
 #'
 #' Generates positive responses whose conditional mode is
 #' \eqn{M_i = \exp(\gamma_0 + x_i^\top\gamma)} under the Gamma, Weibull or
-#' Lognormal mode reparameterization used by \code{\link{modal_lasso}}.
+#' Lognormal mode reparameterization used by \code{\link{modal_net}}.
 #'
 #' @param X covariate matrix without intercept.
 #' @param gamma coefficient vector of length \code{ncol(X) + 1} (intercept first).
@@ -303,3 +303,15 @@ generate_modal_data <- function(X, gamma, phi, family = c("gamma", "weibull", "l
     lognormal = stats::rlnorm(n, meanlog = log(M) + phi, sdlog = sqrt(phi)))
   list(y = y, mode = M, mean = .get_family(family)$mean_const(phi) * M)
 }
+
+
+#' Alias of \code{modal_net} kept for compatibility
+#'
+#' \code{modal_lasso()} was the main function of the package when it was called
+#' \pkg{ModalLasso}. It calls \code{\link{modal_net}} with the same arguments,
+#' so existing code keeps working. New code should use \code{modal_net()}.
+#'
+#' @param ... arguments passed to \code{\link{modal_net}}.
+#' @return The same object as \code{\link{modal_net}}.
+#' @export
+modal_lasso <- function(...) modal_net(...)

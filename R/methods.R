@@ -1,5 +1,5 @@
 #' @export
-print.ModalLasso <- function(x, digits = 4, ...) {
+print.ModalNet <- function(x, digits = 4, ...) {
   cat("Penalized modal regression (proximal Newton + glmnet)\n")
   cat(sprintf("Family: %s   n = %d   p = %d   penalty: %s   EBIC gamma = %.2f\n",
               x$family, x$n, x$p,
@@ -19,7 +19,7 @@ print.ModalLasso <- function(x, digits = 4, ...) {
 }
 
 #' @export
-summary.ModalLasso <- function(object, digits = 4, ...) {
+summary.ModalNet <- function(object, digits = 4, ...) {
   nz <- which(object$gamma[-1] != 0)
   tab <- cbind(Estimate = object$gamma[c(1, nz + 1)],
                `exp(Estimate)` = exp(object$gamma[c(1, nz + 1)]))
@@ -35,12 +35,12 @@ summary.ModalLasso <- function(object, digits = 4, ...) {
                                         EBIC = object$path$ebic,
                                         iter = object$path$iter,
                                         converged = object$path$converged))
-  class(out) <- "summary.ModalLasso"
+  class(out) <- "summary.ModalNet"
   out
 }
 
 #' @export
-print.summary.ModalLasso <- function(x, digits = 4, ...) {
+print.summary.ModalNet <- function(x, digits = 4, ...) {
   cat("--- Penalized Modal Regression Summary ---\n")
   cat(sprintf("Family: %s   n = %d   p = %d\n", x$family, x$n, x$p))
   cat(sprintf("EBIC-selected lambda = %.5f   active set size = %d\n\n", x$lambda, length(x$selected)))
@@ -55,15 +55,15 @@ print.summary.ModalLasso <- function(x, digits = 4, ...) {
 }
 
 #' @export
-coef.ModalLasso <- function(object, s = NULL, ...) {
+coef.ModalNet <- function(object, s = NULL, ...) {
   if (is.null(s)) return(object$gamma)
   l <- which.min(abs(object$path$lambda - s))
   object$path$coef[, l]
 }
 
-#' Predict conditional modes (or means) from a fitted ModalLasso model
+#' Predict conditional modes (or means) from a fitted ModalNet model
 #'
-#' @param object a \code{"ModalLasso"} object.
+#' @param object a \code{"ModalNet"} object.
 #' @param newdata covariate matrix with the same columns as the training
 #'   \code{X}; if missing, the training matrix is used.
 #' @param type \code{"mode"} (default) returns \eqn{\hat M}, \code{"link"} the
@@ -71,7 +71,7 @@ coef.ModalLasso <- function(object, s = NULL, ...) {
 #'   conditional mean \eqn{c(\hat\phi)\hat M}.
 #' @param ... unused.
 #' @export
-predict.ModalLasso <- function(object, newdata, type = c("mode", "link", "mean"), ...) {
+predict.ModalNet <- function(object, newdata, type = c("mode", "link", "mean"), ...) {
   type <- match.arg(type)
   X <- if (missing(newdata)) object$X else as.matrix(newdata)
   eta <- as.numeric(cbind(1, X) %*% object$gamma)
@@ -79,21 +79,21 @@ predict.ModalLasso <- function(object, newdata, type = c("mode", "link", "mean")
 }
 
 #' @export
-fitted.ModalLasso <- function(object, ...) object$fitted.mode
+fitted.ModalNet <- function(object, ...) object$fitted.mode
 
 #' @export
-logLik.ModalLasso <- function(object, ...) {
+logLik.ModalNet <- function(object, ...) {
   structure(object$loglik, df = object$df, nobs = object$n, class = "logLik")
 }
 
-#' Plot the EBIC curve and the coefficient path of a ModalLasso fit
+#' Plot the EBIC curve and the coefficient path of a ModalNet fit
 #'
-#' @param x a \code{"ModalLasso"} object.
+#' @param x a \code{"ModalNet"} object.
 #' @param which \code{1} for the EBIC curve, \code{2} for the coefficient path,
 #'   \code{c(1, 2)} (default) for both side by side.
 #' @param ... further graphical arguments (ignored).
 #' @export
-plot.ModalLasso <- function(x, which = c(1, 2), ...) {
+plot.ModalNet <- function(x, which = c(1, 2), ...) {
   ll <- log(x$path$lambda)
   if (length(which) == 2) { op <- graphics::par(mfrow = c(1, 2)); on.exit(graphics::par(op)) }
   if (1 %in% which) {

@@ -1,10 +1,10 @@
-# ModalLasso
+# ModalNet
 
-**Penalized parametric modal regression for high-dimensional positive responses**
+**Regularized parametric modal regression for high-dimensional positive responses: Lasso, elastic net and ridge**
 
 Christian E. Galarza (ESPOL, Ecuador) · Víctor H. Lachos (University of Connecticut, USA)
 
-`ModalLasso` performs variable selection and estimation in parametric modal regression, where the **conditional mode** of a positive response is linked to a linear predictor:
+`ModalNet` performs variable selection and estimation in parametric modal regression, where the **conditional mode** of a positive response is linked to a linear predictor:
 
 $$\log M_i = \gamma_0 + \mathbf{x}_i^\top\boldsymbol\gamma, \qquad M_i = \arg\max_y f(y \mid \mathbf{x}_i).$$
 
@@ -41,20 +41,20 @@ Two facts proved in the paper and visible in the package output:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("chedgala/ModalLasso")
+remotes::install_github("chedgala/ModalNet")
 ```
 
 ## Quick start
 
 ```r
-library(ModalLasso)
+library(ModalNet)
 set.seed(1)
 n <- 200; p <- 50
 X <- matrix(rnorm(n * p), n, p)
 gamma_true <- c(1, 0.6, -0.5, 0.4, rep(0, p - 3))
 dat <- generate_modal_data(X, gamma_true, phi = 0.3, family = "gamma")
 
-fit <- modal_lasso(dat$y, X, family = "gamma")
+fit <- modal_net(dat$y, X, family = "gamma")
 fit                      # selected variables and coefficients on the log-mode scale
 summary(fit)             # exp(coef), phi, EBIC, mode-mean constant
 plot(fit)                # EBIC curve and coefficient path
@@ -71,7 +71,7 @@ coef(cv, s = "lambda.1se")          # Lasso on log(y): targets the mean of log y
 coef(fit)                           # modal Lasso: targets the mode of y
 ```
 
-For the Lognormal family the two paths coincide (`modal_lasso(..., family = "lognormal")` versus `glmnet(X, log(y))` at the same `lambda`), which is Proposition 1 of the paper; for the Gamma and Weibull families the working weights vary with the data and the fit, and the two selections differ.
+For the Lognormal family the two paths coincide (`modal_net(..., family = "lognormal")` versus `glmnet(X, log(y))` at the same `lambda`), which is Proposition 1 of the paper; for the Gamma and Weibull families the working weights vary with the data and the fit, and the two selections differ.
 
 ## Applications in the paper
 
@@ -82,13 +82,13 @@ For the Lognormal family the two paths coincide (`modal_lasso(..., family = "log
 library(survival)
 v  <- veteran[veteran$status == 1, ]                     # 128 complete cases
 Xv <- model.matrix(~ trt + karno + diagtime + age + prior + celltype, v)[, -1]
-fit_g <- modal_lasso(v$time, Xv, family = "gamma")
-fit_w <- modal_lasso(v$time, Xv, family = "weibull")
+fit_g <- modal_net(v$time, Xv, family = "gamma")
+fit_w <- modal_net(v$time, Xv, family = "weibull")
 colnames(Xv)[fit_g$selected]; colnames(Xv)[fit_w$selected]
 
 data(riboflavinV100)
 y <- riboflavinV100$y / mean(riboflavinV100$y)
-fit_r <- modal_lasso(y, riboflavinV100$x, family = "gamma")
+fit_r <- modal_net(y, riboflavinV100$x, family = "gamma")
 colnames(riboflavinV100$x)[fit_r$selected]
 ```
 

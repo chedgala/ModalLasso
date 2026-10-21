@@ -30,6 +30,6 @@
 #' @examples
 #' data(riboflavinV100)
 #' y <- riboflavinV100$y / mean(riboflavinV100$y)
-#' fit <- modal_lasso(y, riboflavinV100$x, family = "gamma")
+#' fit <- modal_net(y, riboflavinV100$x, family = "gamma")
 #' colnames(riboflavinV100$x)[fit$selected]
 "riboflavinV100"

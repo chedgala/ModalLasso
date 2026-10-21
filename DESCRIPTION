@@ -1,13 +1,13 @@
-Package: ModalLasso
+Package: ModalNet
 Type: Package
-Title: Penalized Parametric Modal Regression for High-Dimensional Positive Responses
-Version: 0.1.1
+Title: Regularized Parametric Modal Regression: Lasso, Elastic Net and Ridge
+Version: 0.2.0
 Authors@R: c(
     person("Christian", "Galarza", email = "chedgala@espol.edu.ec", role = c("aut", "cre")),
     person("Victor H.", "Lachos", email = "hlachos@uconn.edu", role = "aut"))
 Description: Variable selection and estimation for parametric modal regression
     with continuous positive responses (Gamma, Weibull and Lognormal families)
-    under L1 (Lasso), elastic-net and adaptive-Lasso penalties. The conditional
+    under Lasso, elastic-net, ridge and adaptive-Lasso penalties. The conditional
     mode is linked to a linear predictor through a logarithmic link using the
     mode reparameterization of Galarza and Lachos (2026)
     <doi:10.48550/arXiv.2603.07099>. The penalized log-likelihood is maximized
@@ -28,6 +28,6 @@ Imports:
 Suggests:
     survival
 LazyData: true
-URL: https://github.com/chedgala/ModalLasso
-BugReports: https://github.com/chedgala/ModalLasso/issues
+URL: https://github.com/chedgala/ModalNet
+BugReports: https://github.com/chedgala/ModalNet/issues
 RoxygenNote: 7.3.3
