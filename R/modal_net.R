@@ -313,5 +313,6 @@ generate_modal_data <- function(X, gamma, phi, family = c("gamma", "weibull", "l
 #'
 #' @param ... arguments passed to \code{\link{modal_net}}.
 #' @return The same object as \code{\link{modal_net}}.
+#' @keywords internal
 #' @export
 modal_lasso <- function(...) modal_net(...)

@@ -17,3 +17,4 @@ The same object as \code{\link{modal_net}}.
 \pkg{ModalLasso}. It calls \code{\link{modal_net}} with the same arguments,
 so existing code keeps working. New code should use \code{modal_net()}.
 }
+\keyword{internal}
