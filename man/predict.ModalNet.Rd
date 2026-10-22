@@ -18,6 +18,19 @@ conditional mean \eqn{c(\hat\phi)\hat M}.}
 
 \item{...}{unused.}
 }
+\value{
+A numeric vector with one prediction per row of \code{newdata}
+  (or of the training matrix), on the scale chosen by \code{type}.
+}
 \description{
 Predict conditional modes (or means) from a fitted ModalNet model
+}
+\examples{
+set.seed(3)
+X <- matrix(rnorm(120 * 8), 120, 8)
+dat <- generate_modal_data(X, c(1, 0.7, -0.5, rep(0, 6)), phi = 0.3,
+                           family = "gamma")
+fit <- modal_net(dat$y[1:100], X[1:100, ], family = "gamma")
+new <- X[101:120, ]
+cbind(mode = predict(fit, new), mean = predict(fit, new, type = "mean"))[1:5, ]
 }

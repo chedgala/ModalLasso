@@ -67,7 +67,8 @@ objective never increases.}
 
 \item{maxit}{maximum number of proximal Newton iterations per grid point.}
 
-\item{verbose}{print progress along the path.}
+\item{verbose}{logical; report progress along the path through
+\code{\link{message}}.}
 }
 \value{
 An object of class \code{"ModalNet"}, a list with components
@@ -95,8 +96,8 @@ Fits the modal regression model \eqn{\log M_i = \gamma_0 + x_i^\top\gamma},
 where \eqn{M_i} is the conditional mode of a positive response, by
 maximizing the penalized log-likelihood
 \deqn{\ell_p(\gamma,\phi) = \ell(\gamma,\phi)/n - \lambda\,\Psi(\gamma),}
-with \eqn{\Psi} the Lasso, elastic-net or adaptive-Lasso penalty on the
-slopes (the intercept is never penalized). The Gamma, Weibull and Lognormal
+with \eqn{\Psi} the Lasso, elastic-net, ridge or adaptive-Lasso penalty on
+the slopes (the intercept is never penalized). The Gamma, Weibull and Lognormal
 families are available, each written in terms of its mode through the
 reparameterization of Galarza and Lachos (2026).
 }
@@ -130,11 +131,17 @@ is evaluated across the converged fits. The initialization uses a lightly
 penalized Gaussian Lasso of \eqn{\log y} on \eqn{X}, which stays well
 defined when \eqn{p > n}.
 
-The penalty \eqn{\lambda} is expressed on the scale used by \pkg{glmnet},
-whose weights are rescaled to sum to \eqn{n}; as noted in the paper, this is
-what makes the Lognormal fit at penalty \eqn{\lambda} coincide with the
-Gaussian Lasso of \eqn{\log y} at the \emph{same} \eqn{\lambda} (slopes
-identical, intercepts differing by exactly \eqn{\phi}).
+The penalty is
+\eqn{\lambda\Psi(\gamma) = \lambda\sum_j v_j\{\alpha|\gamma_j| + (1-\alpha)\gamma_j^2/2\}}
+on the standardized columns (\eqn{v_j} given by \code{penalty.factor}), and
+\eqn{\lambda} is expressed on the scale used by \pkg{glmnet}, whose weights
+are rescaled to sum to \eqn{n}. For the Lasso this makes the Lognormal fit at
+penalty \eqn{\lambda} coincide with the Gaussian Lasso of \eqn{\log y} at
+the \emph{same} \eqn{\lambda} (slopes identical, intercepts differing by
+exactly \eqn{\phi}). For \code{alpha < 1}, \pkg{glmnet} divides its ridge
+term by the standard deviation of the response it receives; the inner call
+compensates for this, so the penalty above holds exactly for every
+\code{alpha}.
 }
 \examples{
 set.seed(1)
@@ -153,12 +160,14 @@ Galarza, C. E. and Lachos, V. H. (2026). A proximal Newton algorithm for
 penalized modal regression with high-dimensional positive responses.
 
 Galarza, C. E. and Lachos, V. H. (2026). Parametric modal regression for
-right-censored positive responses. arXiv:2603.07099.
+right-censored positive responses. \emph{arXiv preprint}
+\doi{10.48550/arXiv.2603.07099}.
 
 Friedman, J., Hastie, T. and Tibshirani, R. (2010). Regularization paths
 for generalized linear models via coordinate descent. \emph{Journal of
-Statistical Software}, 33(1), 1--22.
+Statistical Software}, 33(1), 1--22. \doi{10.18637/jss.v033.i01}.
 
 Chen, J. and Chen, Z. (2008). Extended Bayesian information criteria for
 model selection with large model spaces. \emph{Biometrika}, 95, 759--771.
+\doi{10.1093/biomet/asn034}.
 }

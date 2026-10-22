@@ -2,7 +2,7 @@
 
 **Regularized parametric modal regression for high-dimensional positive responses: Lasso, elastic net and ridge**
 
-Christian E. Galarza (ESPOL, Ecuador) · Víctor H. Lachos (University of Connecticut, USA)
+Christian E. Galarza (Escuela Superior Politécnica del Litoral, Ecuador) · Víctor H. Lachos (University of Connecticut, USA) · Dashun Liu (University of Connecticut, USA)
 
 `ModalNet` performs variable selection and estimation in parametric modal regression, where the **conditional mode** of a positive response is linked to a linear predictor:
 
@@ -12,7 +12,11 @@ The Gamma, Weibull and Lognormal families are written in terms of their mode thr
 
 $$\ell_p(\boldsymbol\gamma,\phi) = \ell(\boldsymbol\gamma,\phi)/n - \lambda\,\Psi(\boldsymbol\gamma)$$
 
-is maximized for the Lasso, elastic-net and adaptive-Lasso penalties.
+is maximized for the Lasso, elastic-net, ridge and adaptive-Lasso penalties, with
+
+$$\lambda\,\Psi(\boldsymbol\gamma) = \lambda \sum_j v_j \{\alpha|\gamma_j| + (1-\alpha)\gamma_j^2/2\}$$
+
+on the standardized columns (`alpha = 1` Lasso, `0 < alpha < 1` elastic net, `alpha = 0` ridge; the weights $v_j$ come from `penalty.factor`, which gives the adaptive Lasso).
 
 ## Algorithm
 
@@ -30,16 +34,18 @@ $$\min_{\boldsymbol\gamma}\ \tfrac12\sum_i w_i\,(z_i - \mathbf{x}_i^\top\boldsym
 
 solved exactly by the coordinate-descent solver of **glmnet** with observation weights. glmnet never sees the response $y$: it only sees $(z_i, w_i)$, which carry the modal density. The dispersion $\phi$ is updated by maximizing the profile log-likelihood (closed form for the Lognormal family). A backtracking line search keeps the penalized objective monotone, $\lambda$ follows a warm-started decreasing grid, and the final model is chosen by the **extended BIC** (Chen and Chen, 2008) with $\gamma_{\mathrm{EBIC}} = 0.5$ by default.
 
-The penalty $\lambda$ is on glmnet's scale (observation weights rescaled to sum to $n$), exactly as in the paper. The intercept and the dispersion are updated jointly (with the slopes fixed) after every coordinate-descent step, because in the mode parameterization they are strongly coupled.
+The penalty $\lambda$ is on glmnet's scale (observation weights rescaled to sum to $n$), exactly as in the paper. Because glmnet standardizes the Gaussian response and divides its ridge term by the response's standard deviation, the inner call compensates for it, so the penalty above holds exactly for every `alpha`. The intercept and the dispersion are updated jointly (with the slopes fixed) after every coordinate-descent step, because in the mode parameterization they are strongly coupled.
 
 Two facts proved in the paper and visible in the package output:
 
-* **Lognormal equivalence.** The Lognormal modal Lasso at penalty $\lambda$ *is* the Gaussian Lasso on $\log y$ at the same $\lambda$: identical slopes, intercepts differing by exactly $\phi$.
+* **Lognormal equivalence.** The Lognormal modal Lasso at penalty $\lambda$ *is* the Gaussian Lasso on $\log y$ at the same $\lambda$: identical slopes, intercepts differing by exactly $\phi$. The same holds for elastic net and ridge once glmnet's response scaling is accounted for.
 * **Mode and mean differ only in the intercept.** With a log link and constant dispersion, $E[Y \mid \mathbf{x}] = c(\phi)\,M(\mathbf{x})$ with $c(\phi) = 1+\phi$ (Gamma), $\{k/(k-1)\}^{1/k}\Gamma(1+1/k)$ (Weibull), $e^{3\phi/2}$ (Lognormal). `summary()` reports $c(\hat\phi)$ and the mean-scale intercept.
 
 ## Installation
 
 ```r
+install.packages("ModalNet")                    # CRAN
+# development version:
 # install.packages("remotes")
 remotes::install_github("chedgala/ModalNet")
 ```

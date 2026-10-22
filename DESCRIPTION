@@ -1,23 +1,31 @@
 Package: ModalNet
 Type: Package
 Title: Regularized Parametric Modal Regression: Lasso, Elastic Net and Ridge
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: c(
-    person("Christian", "Galarza", email = "chedgala@espol.edu.ec", role = c("aut", "cre")),
-    person("Victor H.", "Lachos", email = "hlachos@uconn.edu", role = "aut"))
+    person("Christian E.", "Galarza", email = "chedgala@espol.edu.ec",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-4818-6006",
+                       affiliation = "Escuela Superior Politécnica del Litoral, Guayaquil, Ecuador")),
+    person("Víctor H.", "Lachos", email = "hlachos@uconn.edu", role = "aut",
+           comment = c(ORCID = "0000-0002-7239-2459",
+                       affiliation = "University of Connecticut, Storrs, CT, USA")),
+    person("Dashun", "Liu", email = "dashun.liu@uconn.edu", role = "aut",
+           comment = c(affiliation = "University of Connecticut, Storrs, CT, USA")))
 Description: Variable selection and estimation for parametric modal regression
     with continuous positive responses (Gamma, Weibull and Lognormal families)
     under Lasso, elastic-net, ridge and adaptive-Lasso penalties. The conditional
     mode is linked to a linear predictor through a logarithmic link using the
-    mode reparameterization of Galarza and Lachos (2026)
-    <doi:10.48550/arXiv.2603.07099>. The penalized log-likelihood is maximized
-    with a proximal Newton algorithm (iteratively reweighted penalized least
-    squares): at each iteration the modal log-likelihood is replaced by a local
-    quadratic surrogate in the linear predictor, which yields a pseudo-response
-    and a working weight in closed form, and the resulting weighted penalized
-    least-squares subproblem is solved by the coordinate-descent solver of
-    'glmnet'. The regularization parameter is chosen along a warm-started path by
-    the extended Bayesian information criterion (EBIC).
+    mode reparameterization of Galarza and Lachos (2026) <doi:10.48550/arXiv.2603.07099>.
+    The penalized log-likelihood is maximized with a proximal Newton algorithm
+    (iteratively reweighted penalized least squares): at each iteration the
+    modal log-likelihood is replaced by a local quadratic surrogate in the
+    linear predictor, which yields a pseudo-response and a working weight in
+    closed form, and the resulting weighted penalized least-squares subproblem
+    is solved by the coordinate-descent solver of 'glmnet' (Friedman, Hastie and
+    Tibshirani, 2010, <doi:10.18637/jss.v033.i01>). The regularization parameter
+    is chosen along a warm-started path by the extended Bayesian information
+    criterion of Chen and Chen (2008) <doi:10.1093/biomet/asn034>.
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 4.1.0)

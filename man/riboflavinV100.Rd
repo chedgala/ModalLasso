@@ -17,8 +17,9 @@ A list with two components:
 \source{
 Bühlmann, P., Kalisch, M. and Meier, L. (2014). High-dimensional
   statistics with a view towards applications in biology. \emph{Annual
-  Review of Statistics and its Application}, 1, 255--278. Data from the
-  R package \pkg{hdi} (GPL).
+  Review of Statistics and Its Application}, 1, 255--278.
+  \doi{10.1146/annurev-statistics-022513-115545}. Data from the R package
+  \pkg{hdi} (GPL).
 }
 \usage{
 riboflavinV100
@@ -48,5 +49,6 @@ colnames(riboflavinV100$x)[fit$selected]
 Schelldorfer, J., Bühlmann, P. and van de Geer, S. (2011).
   Estimation for high-dimensional linear mixed-effects models using
   L1-penalization. \emph{Scandinavian Journal of Statistics}, 38, 197--214.
+  \doi{10.1111/j.1467-9469.2011.00740.x}.
 }
 \keyword{datasets}

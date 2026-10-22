@@ -14,6 +14,20 @@
 
 \item{...}{further graphical arguments (ignored).}
 }
+\value{
+The \code{"ModalNet"} object, invisibly. Called for its side effect:
+  the EBIC against \eqn{\log\lambda}, with the selected value marked, and
+  the coefficient paths on the log-mode scale.
+}
 \description{
 Plot the EBIC curve and the coefficient path of a ModalNet fit
+}
+\examples{
+set.seed(4)
+X <- matrix(rnorm(150 * 10), 150, 10)
+dat <- generate_modal_data(X, c(1, 0.6, -0.4, rep(0, 8)), phi = 0.3,
+                           family = "lognormal")
+fit <- modal_net(dat$y, X, family = "lognormal")
+plot(fit)
+plot(fit, which = 2)
 }

@@ -1,9 +1,51 @@
+#' Methods for ModalNet fits
+#'
+#' Print, summarize and extract the components of a model fitted by
+#' \code{\link{modal_net}}.
+#'
+#' @param x,object a \code{"ModalNet"} object (\code{x} is a
+#'   \code{"summary.ModalNet"} object in \code{print.summary.ModalNet}).
+#' @param digits number of decimal places to print.
+#' @param s optional penalty value; \code{coef()} then returns the coefficients
+#'   of the path at the grid value closest to \code{s}.
+#' @param ... unused.
+#'
+#' @return
+#' \code{print.ModalNet} and \code{print.summary.ModalNet} return their
+#' argument invisibly.
+#' \code{summary.ModalNet} returns an object of class \code{"summary.ModalNet"},
+#' a list with the coefficient table of the selected covariates (estimates on
+#' the log-mode scale and their exponentials), the dispersion, the selected
+#' penalty, the log-likelihood, EBIC and degrees of freedom, the names of the
+#' selected covariates, the mode-mean constant \eqn{c(\hat\phi)} with the
+#' implied mean-scale intercept, and a data frame summarizing the path.
+#' \code{coef.ModalNet} returns the named coefficient vector (intercept first),
+#' \code{fitted.ModalNet} the fitted conditional modes, and
+#' \code{logLik.ModalNet} an object of class \code{"logLik"}.
+#'
+#' @examples
+#' set.seed(2)
+#' X <- matrix(rnorm(150 * 10), 150, 10)
+#' dat <- generate_modal_data(X, c(0.5, 0.8, -0.6, rep(0, 8)), phi = 0.2,
+#'                            family = "weibull")
+#' fit <- modal_net(dat$y, X, family = "weibull")
+#' print(fit)
+#' s <- summary(fit)
+#' s$coefficients
+#' coef(fit)
+#' head(fitted(fit))
+#' logLik(fit)
+#' @name ModalNet-methods
+NULL
+
+#' @rdname ModalNet-methods
 #' @export
 print.ModalNet <- function(x, digits = 4, ...) {
   cat("Penalized modal regression (proximal Newton + glmnet)\n")
   cat(sprintf("Family: %s   n = %d   p = %d   penalty: %s   EBIC gamma = %.2f\n",
               x$family, x$n, x$p,
-              if (x$alpha == 1) "Lasso" else sprintf("elastic net (alpha = %.2f)", x$alpha),
+              if (x$alpha == 1) "Lasso" else if (x$alpha == 0) "ridge"
+              else sprintf("elastic net (alpha = %.2f)", x$alpha),
               x$gamma_ebic))
   cat(sprintf("Selected lambda = %.5f   selected covariates: %d of %d\n",
               x$lambda, length(x$selected), x$p))
@@ -18,6 +60,7 @@ print.ModalNet <- function(x, digits = 4, ...) {
   invisible(x)
 }
 
+#' @rdname ModalNet-methods
 #' @export
 summary.ModalNet <- function(object, digits = 4, ...) {
   nz <- which(object$gamma[-1] != 0)
@@ -39,6 +82,7 @@ summary.ModalNet <- function(object, digits = 4, ...) {
   out
 }
 
+#' @rdname ModalNet-methods
 #' @export
 print.summary.ModalNet <- function(x, digits = 4, ...) {
   cat("--- Penalized Modal Regression Summary ---\n")
@@ -54,6 +98,7 @@ print.summary.ModalNet <- function(x, digits = 4, ...) {
   invisible(x)
 }
 
+#' @rdname ModalNet-methods
 #' @export
 coef.ModalNet <- function(object, s = NULL, ...) {
   if (is.null(s)) return(object$gamma)
@@ -70,6 +115,16 @@ coef.ModalNet <- function(object, s = NULL, ...) {
 #'   linear predictor \eqn{\log \hat M}, and \code{"mean"} the implied
 #'   conditional mean \eqn{c(\hat\phi)\hat M}.
 #' @param ... unused.
+#' @return A numeric vector with one prediction per row of \code{newdata}
+#'   (or of the training matrix), on the scale chosen by \code{type}.
+#' @examples
+#' set.seed(3)
+#' X <- matrix(rnorm(120 * 8), 120, 8)
+#' dat <- generate_modal_data(X, c(1, 0.7, -0.5, rep(0, 6)), phi = 0.3,
+#'                            family = "gamma")
+#' fit <- modal_net(dat$y[1:100], X[1:100, ], family = "gamma")
+#' new <- X[101:120, ]
+#' cbind(mode = predict(fit, new), mean = predict(fit, new, type = "mean"))[1:5, ]
 #' @export
 predict.ModalNet <- function(object, newdata, type = c("mode", "link", "mean"), ...) {
   type <- match.arg(type)
@@ -78,9 +133,11 @@ predict.ModalNet <- function(object, newdata, type = c("mode", "link", "mean"), 
   switch(type, link = eta, mode = exp(eta), mean = object$mean_const * exp(eta))
 }
 
+#' @rdname ModalNet-methods
 #' @export
 fitted.ModalNet <- function(object, ...) object$fitted.mode
 
+#' @rdname ModalNet-methods
 #' @export
 logLik.ModalNet <- function(object, ...) {
   structure(object$loglik, df = object$df, nobs = object$n, class = "logLik")
@@ -92,6 +149,17 @@ logLik.ModalNet <- function(object, ...) {
 #' @param which \code{1} for the EBIC curve, \code{2} for the coefficient path,
 #'   \code{c(1, 2)} (default) for both side by side.
 #' @param ... further graphical arguments (ignored).
+#' @return The \code{"ModalNet"} object, invisibly. Called for its side effect:
+#'   the EBIC against \eqn{\log\lambda}, with the selected value marked, and
+#'   the coefficient paths on the log-mode scale.
+#' @examples
+#' set.seed(4)
+#' X <- matrix(rnorm(150 * 10), 150, 10)
+#' dat <- generate_modal_data(X, c(1, 0.6, -0.4, rep(0, 8)), phi = 0.3,
+#'                            family = "lognormal")
+#' fit <- modal_net(dat$y, X, family = "lognormal")
+#' plot(fit)
+#' plot(fit, which = 2)
 #' @export
 plot.ModalNet <- function(x, which = c(1, 2), ...) {
   ll <- log(x$path$lambda)
