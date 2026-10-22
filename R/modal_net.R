@@ -187,7 +187,9 @@ modal_net <- function(y, X, family = c("gamma", "weibull", "lognormal"),
     g1 <- glmnet::glmnet(X, zw$z, weights = zw$w, family = "gaussian", alpha = alpha,
                          penalty.factor = penalty.factor, standardize = standardize,
                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
-    lambda <- g1$lambda
+    wn0 <- zw$w / sum(zw$w)
+    sz0 <- max(sqrt(sum(wn0 * (zw$z - sum(wn0 * zw$z))^2)), 1e-12)
+    lambda <- g1$lambda / (alpha + (1 - alpha) * sz0)   # same scale as the subproblem below
   } else {
     lambda <- sort(as.numeric(lambda), decreasing = TRUE)
   }
@@ -207,9 +209,14 @@ modal_net <- function(y, X, family = c("gamma", "weibull", "lognormal"),
       w <- zw$w; z <- zw$z; S <- sum(w); sdj <- col_scale(w)
       obj_old <- objective(gam, phi, lam, S, sdj)
       ## 2. penalized weighted least squares by coordinate descent (glmnet)
-      g_fit <- glmnet::glmnet(X, z, weights = w, family = "gaussian", alpha = alpha,
+      ##    glmnet standardizes the Gaussian response, which divides its ridge
+      ##    term by sd(z); (lam_g, alpha_g) undo that so that the subproblem
+      ##    carries exactly lam * [alpha |.| + (1 - alpha) (.)^2 / 2]
+      sz <- max(sqrt(sum(w * (z - sum(w * z) / S)^2) / S), 1e-12)
+      lam_g <- lam * (alpha + (1 - alpha) * sz); alpha_g <- lam * alpha / lam_g
+      g_fit <- glmnet::glmnet(X, z, weights = w, family = "gaussian", alpha = alpha_g,
                               penalty.factor = penalty.factor, standardize = standardize,
-                              lambda = lam)
+                              lambda = lam_g)
       g_new <- as.numeric(stats::coef(g_fit))
       ## 3. backtracking line search on the penalized objective
       step <- 1

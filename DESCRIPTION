@@ -1,7 +1,7 @@
 Package: ModalNet
 Type: Package
 Title: Regularized Parametric Modal Regression: Lasso, Elastic Net and Ridge
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(
     person("Christian", "Galarza", email = "chedgala@espol.edu.ec", role = c("aut", "cre")),
     person("Victor H.", "Lachos", email = "hlachos@uconn.edu", role = "aut"))
